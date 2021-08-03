@@ -37,58 +37,102 @@ class NameForm extends React.Component {
   }
 }
 
-function App() {
-  const teams = [
-    {rank: 1, team: 'dragons', win: 3, loss: 1, diff: 3},
-    {rank: 2, team: 'dynasty', win: 2, loss: 1, diff: 1}
-  ]
-  const [sortedField, setSortedField] = React.useState(null);
-  let sortedProducts = [...teams];
-  if (sortedField !== null) {
-    sortedProducts.sort((a, b) => {
-      if (a[sortedField] < b[sortedField]) {
-        return -1;
-      }
-      if (a[sortedField] > b[sortedField]) {
-        return 1;
-      }
-      return 0;
-    });
-  }
+const useSortableData = (teams, config = null) => {
+  const [sortConfig, setSortConfig] = React.useState(config);
+
+  const sortedTeams = React.useMemo(() => {
+    let sortableTeams = [...teams];
+    if (sortConfig !== null) {
+      sortableTeams.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableTeams;
+  }, [teams, sortConfig]);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === 'ascending'
+    ) {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  return { teams: sortedTeams, requestSort, sortConfig };
+};
+
+const TeamTable = (props) => {
+  const { teams, requestSort, sortConfig } = useSortableData(props.teams);
+  const getClassNamesFor = (name) => {
+    if (!sortConfig) {
+      return;
+    }
+    return sortConfig.key === name ? sortConfig.direction : undefined;
+  };
   return (
-    <div className="ree">
+    <div className="container">
       <table>
       <thead>
         <tr>
           <th>
-            <button type="button" onClick={() => setSortedField('rank')}>
+            <button 
+              type="button" 
+              onClick={() => requestSort('rank')}
+              className={getClassNamesFor('rank')}
+            >
               Rank
             </button>
           </th>
           <th>
-            <button type="button" onClick={() => setSortedField('team')}>
+            <button 
+              type="button" 
+              onClick={() => requestSort('team')}
+              className={getClassNamesFor('team')}
+            >
               Team
             </button>
           </th>
           <th>
-            <button type="button" onClick={() => setSortedField('win')}>
+            <button 
+              type="button" 
+              onClick={() => requestSort('win')}
+              className={getClassNamesFor('win')}
+            >
               W
             </button>
           </th>
           <th>
-            <button type="button" onClick={() => setSortedField('loss')}>
+            <button 
+              type="button" 
+              onClick={() => requestSort('loss')}
+              className={getClassNamesFor('loss')}
+            >
               L
             </button>
           </th>
           <th>
-            <button type="button" onClick={() => setSortedField('diff')}>
+            <button 
+              type="button" 
+              onClick={() => requestSort('diff')}
+              className={getClassNamesFor('diff')}
+            >
               Diff
             </button>
           </th>
         </tr>
       </thead>
       <tbody>
-        {teams.map(team => (
+        {teams.map((team) => (
           <tr key={team.team}>
             <td>{team.rank}</td>
             <td>{team.team}</td>
@@ -102,6 +146,25 @@ function App() {
     <NameForm></NameForm>
     </div>
   );
+}
+
+function App() {
+  return (
+    <div className="App">
+      <TeamTable
+        teams={[
+          {rank: 1, team: 'dragons', win: 18, loss: 4, diff: 16},
+          {rank: 2, team: 'dynasty', win: 11, loss: 3, diff: 18},
+          {rank: 3, team: 'fusion', win: 9, loss: 5, diff: 12},
+          {rank: 4, team: 'hunters', win: 9, loss: 5, diff: 7},
+          {rank: 5, team: 'spark', win: 7, loss: 7, diff: 4},
+          {rank: 6, team: 'excelsior', win: 7, loss: 7, diff: 1},
+          {rank: 7, team: 'charge', win: 3, loss: 9, diff: -18},
+          {rank: 8, team: 'valiant', win: 0, loss: 14, diff: -40},
+        ]}
+      />
+    </div>
+  )
 }
 
 export default App;
