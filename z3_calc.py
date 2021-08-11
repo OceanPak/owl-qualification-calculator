@@ -1,4 +1,4 @@
-import z3, copy
+import z3, copy, json
 
 # Purpose: To generate all the possibilties for a given team to qualify
 
@@ -118,20 +118,33 @@ def initSolver():
     
     return S
 
-# def getRightScores(games, win, loss, diff):
-
-
-def findTeamsWithPossiblePosition(S):
+def findAllScenarios(S, index):
     "Returns a list of teams which *can* satisfy predicate pos."
     # S.push()
     # enforce where SFS qualifies
     sfs_lst = list(filter(lambda t: t.name == "SFS", teams))
     S.add(sfs_lst[0].position <= 6)
     
-    # finalResults = []
+    finalResults = []
+    currIndex = 0
 
     while S.check() == z3.sat:
-        print("SFS Position", teams[8].name, S.model()[teams[8].position])
+        # for faster loading times, return first 100 scenarios (100 * 12 teams)
+        if len(finalResults) > 1200:
+            break
+        # skip over seen scenarios until it reaches index, could be optimized here
+        if currIndex < index:
+            m = S.model()
+            block = []
+            for d in m:
+                # create a constant from declaration
+                c = d()
+                block.append(c != m[d])
+            S.add(z3.Or(block))
+            currIndex += 1
+            continue
+
+        # print("SFS Position", teams[8].name, S.model()[teams[8].position])
         m = S.model()
         m2 = copy.deepcopy(m)
             
@@ -173,10 +186,11 @@ def findTeamsWithPossiblePosition(S):
                             new_losses += 1
                         new_map_diff = val[1] - val[0]
 
-                # finalResults.append(Scenario(team.name, int(m[d].as_string()), games, team.win + new_wins, team.loss + new_losses, team.diff + new_map_diff, team.region))
-                print("%s = %s" % (d.name(), m[d]), games, team.win, team.loss, team.diff, new_wins, new_losses, new_map_diff)
+                finalResults.append(Scenario(team.name, int(m[d].as_string()), games, team.win + new_wins, team.loss + new_losses, team.diff + new_map_diff, team.region))
+                currIndex += 1
+                # print("%s = %s" % (d.name(), m[d]), games, team.win, team.loss, team.diff, new_wins, new_losses, new_map_diff)
                     
-        print("\n")
+        # print("\n")
 
         block = []
         for d in m:
@@ -186,10 +200,11 @@ def findTeamsWithPossiblePosition(S):
         S.add(z3.Or(block))
     
     # S.pop()
-    return teams
+    return json.dumps([s.__dict__ for s in finalResults])
 
-S = initSolver()
-findTeamsWithPossiblePosition(S)
+# S = initSolver()
+# print(findAllScenarios(S, 0))
+
 # winners = findTeamsWithPossiblePosition(S, teams)
 
 # print('Possible teams that can qualify:\n%s\n' % (

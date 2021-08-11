@@ -11,5 +11,4 @@ def get_current_time():
 @app.route('/solve')
 def get_winning_scenarios():
     S = initSolver()
-    findTeamsWithPossiblePosition(S)
-    return "hello"
+    return findAllScenarios(S, 0)
