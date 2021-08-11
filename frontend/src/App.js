@@ -1,5 +1,5 @@
 import './App.css';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // https://www.owlstandings.com/
 
@@ -38,7 +38,7 @@ class NameForm extends React.Component {
 }
 
 const useSortableData = (teams, config = null) => {
-  const [sortConfig, setSortConfig] = React.useState(config);
+  const [sortConfig, setSortConfig] = useState(config);
 
   const sortedTeams = React.useMemo(() => {
     let sortableTeams = [...teams];
@@ -79,6 +79,23 @@ const TeamTable = (props) => {
     }
     return sortConfig.key === name ? sortConfig.direction : undefined;
   };
+
+  const [currentTime, setCurrentTime] = useState(0);
+
+  useEffect(() => {
+    fetch('/time').then(res => res.json()).then(data => {
+      setCurrentTime(data.time);
+    });
+  }, []);
+
+  const [result, setResult] = useState(0);
+
+  useEffect(() => {
+    fetch('/solve').then(res => res.json()).then(data => {
+      setResult(data);
+    });
+  }, []);
+
   return (
     <div className="container">
       <table>
@@ -143,6 +160,7 @@ const TeamTable = (props) => {
         ))}
       </tbody>
     </table>
+    <p>The current time is {currentTime}.</p>
     <NameForm></NameForm>
     </div>
   );
