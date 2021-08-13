@@ -22,10 +22,9 @@ class Team:
         self.region = region
 
 class Scenario:
-    def __init__(self, team, pos, games, win, loss, diff, region):
+    def __init__(self, team, pos, win, loss, diff, region):
         self.name = team
         self.pos = pos
-        self.games = games
         self.win = win
         self.loss = loss
         self.diff = diff
@@ -126,11 +125,12 @@ def findAllScenarios(S, index):
     S.add(sfs_lst[0].position <= 6)
     
     finalResults = []
+    finalGames = []
     currIndex = 0
 
     while S.check() == z3.sat:
         # for faster loading times, return first 100 scenarios (100 * 12 teams)
-        if len(finalResults) > 1200:
+        if len(finalResults) > 12:
             break
         # skip over seen scenarios until it reaches index, could be optimized here
         if currIndex < index:
@@ -147,12 +147,12 @@ def findAllScenarios(S, index):
         # print("SFS Position", teams[8].name, S.model()[teams[8].position])
         m = S.model()
         m2 = copy.deepcopy(m)
-            
+        games = {}
+
         for d in m.decls():
             if "_pos" in d.name():
                 team = list(filter(lambda t: t.name == d.name()[0:3], teams))[0]
                     
-                games = {}
                 new_wins = 0
                 new_losses = 0
                 new_map_diff = 0
@@ -186,11 +186,12 @@ def findAllScenarios(S, index):
                             new_losses += 1
                         new_map_diff = val[1] - val[0]
 
-                finalResults.append(Scenario(team.name, int(m[d].as_string()), games, team.win + new_wins, team.loss + new_losses, team.diff + new_map_diff, team.region))
+                finalResults.append(Scenario(team.name, int(m[d].as_string()), team.win + new_wins, team.loss + new_losses, team.diff + new_map_diff, team.region))
                 currIndex += 1
                 # print("%s = %s" % (d.name(), m[d]), games, team.win, team.loss, team.diff, new_wins, new_losses, new_map_diff)
                     
         # print("\n")
+        finalGames.append(games)
 
         block = []
         for d in m:
@@ -200,7 +201,7 @@ def findAllScenarios(S, index):
         S.add(z3.Or(block))
     
     # S.pop()
-    return json.dumps([s.__dict__ for s in finalResults])
+    return json.dumps(([s.__dict__ for s in finalResults],finalGames))
 
 # S = initSolver()
 # print(findAllScenarios(S, 0))

@@ -100,6 +100,10 @@ const TeamTable = (props) => {
   //   });
   // }, []);
 
+  var index = 1;
+  const threshold = 12;
+  // TODO: Do filtering here, called by onclick
+
   return (
     <div className="container">
       <table>
@@ -167,32 +171,67 @@ const TeamTable = (props) => {
     <p>The current time is {currentTime}.</p>
     {/* {result.map(r => <p>{r.name}</p>)} */}
     <NameForm></NameForm>
-    <Table />
+    <StandingsTable index={index} threshold={threshold} />
     </div>
   );
 }
 
-class Table extends React.Component {
+class StandingsTable extends React.Component {
   constructor(props){
     super(props);
-    // console.log("bla")
-    // console.log(props)
+    this.index = this.props.index
+    this.threshold = this.props.threshold
     this.getHeader = this.getHeader.bind(this);
     this.getRowsData = this.getRowsData.bind(this);
     this.getKeys = this.getKeys.bind(this);
     this.state = {
       data: [
         { }
-      ]
+      ],
+      result : [ {} ],
+      refreshShoeList: false
     }
+    this.a = [
+      [
+        "ATL-BOS",
+        [
+          3,
+          2
+        ]
+      ],
+      [
+        "WAS-GLA",
+        [
+          3,
+          0
+        ]
+      ],
+      [
+        "DAL-TOR",
+        [
+          3,
+          1
+        ]
+      ]
+    ]
   }
 
   componentDidMount() {
     fetch('/solve').then(res => res.json()).then(data => {
-      data.map(obj => obj.games = Object.keys(obj.games).map(function (key) { return [key, obj.games[key]]} ))
-      console.log("before", data)
-      this.setState({data: data})
-      console.log("state", this.state.data)
+      console.log(data)
+      // TODO: save this result in the state of the parent
+      
+      // filter based on index
+      var filteredData = data[0].filter((_, index) => index >= this.index * this.threshold && index < this.index * this.threshold + this.threshold)
+      var filteredResult = [data[1][this.index]] // TODO: Should have index
+      
+      // fix keys to fit the format of the table
+      filteredResult.map(obj => filteredResult = Object.keys(obj).map(function (key) { return [key, obj[key]]} ))
+      
+      // set to state
+      this.setState({data: filteredData, result: filteredResult})
+      this.setState({refreshShoeList: !this.state.refreshShoeList})
+      console.log("state", this.state.result)
     });
   }
   
@@ -226,16 +265,53 @@ class Table extends React.Component {
             {this.getRowsData()}
           </tbody>
         </table>
+        <ResultsTable result={this.state.result} />
       </div>
     );
   }
- }
+}
+
+class ResultsTable extends React.Component {
+  constructor(props){
+    super(props);
+    console.log(this.props)
+    this.getRowsData = this.getRowsData.bind(this);
+    this.getKeys = this.getKeys.bind(this);
+    this.state = {
+      result: this.props.result
+    }
+  }
+  
+  getKeys = function(){
+    return Object.keys(this.state.result[0]);
+  }
+  
+  getRowsData = function(){
+    var items = this.state.result;
+    var keys = this.getKeys();
+    return items.map((row, index)=>{ // 2 trs
+      return <tr key={index}><RenderRow key={index} data={row} keys={keys}/></tr>
+    })
+  }
+  
+  render() {
+    return (
+      <div>
+        <table>
+          <tbody>
+            {this.getRowsData()}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+}
  
- const RenderRow = (props) =>{
+const RenderRow = (props) =>{ // 3 tds here
   return props.keys.map((key, index)=>{
       return <td key={props.data[key]}>{props.data[key]}</td>
   })
- }
+}
 
 function App() {
   return (
