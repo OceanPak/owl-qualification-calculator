@@ -88,13 +88,17 @@ const TeamTable = (props) => {
     });
   }, []);
 
-  const [result, setResult] = useState(0);
+  // const initialValue = [
+  //   { name: "", pos: "", games: {}, wins: 0, loss: 0, diff: 0, region: "" }];
 
-  useEffect(() => {
-    fetch('/solve').then(res => res.json()).then(data => {
-      setResult(data);
-    });
-  }, []);
+  // const [result, setResult] = useState(initialValue);
+
+  // useEffect(() => {
+  //   fetch('/solve').then(res => res.json()).then(data => {
+  //     console.log(data)
+  //     setResult(data);
+  //   });
+  // }, []);
 
   return (
     <div className="container">
@@ -161,10 +165,77 @@ const TeamTable = (props) => {
       </tbody>
     </table>
     <p>The current time is {currentTime}.</p>
+    {/* {result.map(r => <p>{r.name}</p>)} */}
     <NameForm></NameForm>
+    <Table />
     </div>
   );
 }
+
+class Table extends React.Component {
+  constructor(props){
+    super(props);
+    // console.log("bla")
+    // console.log(props)
+    this.getHeader = this.getHeader.bind(this);
+    this.getRowsData = this.getRowsData.bind(this);
+    this.getKeys = this.getKeys.bind(this);
+    this.state = {
+      data: [
+        { }
+      ]
+    }
+  }
+
+  componentDidMount() {
+    fetch('/solve').then(res => res.json()).then(data => {
+      data.map(obj => obj.games = Object.keys(obj.games).map(function (key) { return [key, obj.games[key]]} ))
+      console.log("before", data)
+      this.setState({data: data})
+      console.log("state", this.state.data)
+    });
+  }
+  
+  getKeys = function(){
+    return Object.keys(this.state.data[0]);
+  }
+  
+  getHeader = function(){
+    var keys = this.getKeys();
+    return keys.map((key, index)=>{
+      return <th key={key}>{key.toUpperCase()}</th>
+    })
+  }
+  
+  getRowsData = function(){
+    var items = this.state.data;
+    var keys = this.getKeys();
+    return items.map((row, index)=>{
+      return <tr key={index}><RenderRow key={index} data={row} keys={keys}/></tr>
+    })
+  }
+  
+  render() {
+    return (
+      <div>
+        <table>
+          <thead>
+            <tr>{this.getHeader()}</tr>
+          </thead>
+          <tbody>
+            {this.getRowsData()}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+ }
+ 
+ const RenderRow = (props) =>{
+  return props.keys.map((key, index)=>{
+      return <td key={props.data[key]}>{props.data[key]}</td>
+  })
+ }
 
 function App() {
   return (

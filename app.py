@@ -1,6 +1,6 @@
 import time
 from flask import Flask
-from z3_test import initSolver, findTeamsWithPossiblePosition
+from z3_calc import initSolver, findAllScenarios
 
 app = Flask(__name__)
 
