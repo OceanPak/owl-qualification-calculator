@@ -1,6 +1,5 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import RenderRow from "./RenderRow"
 import ResultsTable from "./ResultsTable"
 
 // https://www.owlstandings.com/
@@ -90,18 +89,6 @@ const TeamTable = (props) => {
     });
   }, []);
 
-  // const initialValue = [
-  //   { name: "", pos: "", games: {}, wins: 0, loss: 0, diff: 0, region: "" }];
-
-  // const [result, setResult] = useState(initialValue);
-
-  // useEffect(() => {
-  //   fetch('/solve').then(res => res.json()).then(data => {
-  //     console.log(data)
-  //     setResult(data);
-  //   });
-  // }, []);
-
   var index = 0;
   const threshold = 12;
   // TODO: Do filtering here, called by onclick
@@ -178,40 +165,94 @@ const TeamTable = (props) => {
   );
 }
 
+const RenderRow = (props) =>{ // 3 tds here
+  return props.keys.map((key, index)=>{
+      return <td>{props.data[key]}</td>
+  })
+}
+
 class StandingsTable extends React.Component {
   constructor(props){
     super(props);
-    this.index = this.props.index
     this.threshold = this.props.threshold
     this.getHeader = this.getHeader.bind(this);
     this.getRowsData = this.getRowsData.bind(this);
     this.getKeys = this.getKeys.bind(this);
     this.state = {
+      batchIndex: this.props.index,
+      index: this.props.index,
+      fullData: [ {} ],
       data: [
         { }
       ],
-      result : [ {} ],
-      refreshShoeList: false
+      result : [ {} ]
     }
+    console.log(this.state)
   }
 
   componentDidMount() {
     fetch('/solve').then(res => res.json()).then(data => {
       console.log(data)
+      // save all the data for index filtering
+      this.setState({fullData: data})
+
       // TODO: save this result in the state of the parent
       
       // filter based on index
-      var filteredData = data[0].filter((_, index) => index >= this.index * this.threshold && index < this.index * this.threshold + this.threshold)
-      var filteredResult = [data[1][this.index]] // TODO: Should have index
+      var filteredData = data[0].filter((_, index) => index >= this.state.index * this.threshold && index < this.state.index * this.threshold + this.threshold)
+      var filteredResult = [data[1][this.state.index]] // TODO: Should have index
+
+      // fix keys to fit the format of the table
+      filteredResult.map(obj => filteredResult = Object.keys(obj).map(function (key) { return [key, obj[key]]} ))
+      
+      // set to state
+      this.setState({data: filteredData, result: filteredResult})
+      console.log("state", this.state.result)
+    });
+  }
+
+  nextScenario = function() {
+    var newIndex = this.state.index + 1
+
+    if (newIndex * this.threshold >= this.state.fullData[0].length) {
+      this.setState({index: 0, batchIndex: this.state.batchIndex + newIndex})
+
+      fetch("/solve-next-batch", {
+        method: "POST",
+        headers: {
+        'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(newIndex)
+      }).then(res => res.json()).then(data => {
+        // save all the data for index filtering
+        this.setState({fullData: data})
+
+        newIndex = 0
+        
+        // filter based on index
+        var filteredData = data[0].filter((_, index) => index >= newIndex * this.threshold && index < newIndex * this.threshold + this.threshold)
+        var filteredResult = [data[1][newIndex]] // TODO: Should have index
+  
+        // fix keys to fit the format of the table
+        filteredResult.map(obj => filteredResult = Object.keys(obj).map(function (key) { return [key, obj[key]]} ))
+        
+        // set to state
+        this.setState({data: filteredData, result: filteredResult})
+        console.log("new state", this.state)
+      });
+    } else {
+      this.setState({index: newIndex})
+      // filter based on index
+      var filteredData = this.state.fullData[0].filter((_, index) => index >= newIndex * this.threshold && index < newIndex * this.threshold + this.threshold)
+      var filteredResult = [this.state.fullData[1][newIndex]] // TODO: Should have index
       
       // fix keys to fit the format of the table
       filteredResult.map(obj => filteredResult = Object.keys(obj).map(function (key) { return [key, obj[key]]} ))
       
       // set to state
       this.setState({data: filteredData, result: filteredResult})
-      this.setState({refreshShoeList: !this.state.refreshShoeList})
-      console.log("state", this.state.result)
-    });
+      console.log("full state", this.state)
+    }
   }
   
   getKeys = function(){
@@ -221,7 +262,7 @@ class StandingsTable extends React.Component {
   getHeader = function(){
     var keys = this.getKeys();
     return keys.map((key, index)=>{
-      return <th key={key}>{key.toUpperCase()}</th>
+      return <th>{key.toUpperCase()}</th>
     })
   }
   
@@ -229,7 +270,7 @@ class StandingsTable extends React.Component {
     var items = this.state.data;
     var keys = this.getKeys();
     return items.map((row, index)=>{
-      return <tr key={index}><RenderRow key={index} data={row} keys={keys}/></tr>
+      return <tr><RenderRow data={row} keys={keys}/></tr>
     })
   }
   
@@ -245,6 +286,12 @@ class StandingsTable extends React.Component {
           </tbody>
         </table>
         <ResultsTable result={this.state.result} />
+        <button 
+          type="button" 
+          onClick={() => this.nextScenario()}
+        >
+          Next Scenario
+        </button>
       </div>
     );
   }

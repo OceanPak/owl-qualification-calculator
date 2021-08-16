@@ -56,6 +56,7 @@ teams = [
 def initSolver():
     gameVars = []
 
+    z3.set_option('smt.random_seed', 0)
     S = z3.Solver()
 
     # Encode constraints on the number of points that can be scored in each game
@@ -121,6 +122,7 @@ def findAllScenarios(S, index):
     "Returns a list of teams which *can* satisfy predicate pos."
     # S.push()
     # enforce where SFS qualifies
+
     sfs_lst = list(filter(lambda t: t.name == "SFS", teams))
     S.add(sfs_lst[0].position <= 6)
     
@@ -156,14 +158,18 @@ def findAllScenarios(S, index):
                 new_wins = 0
                 new_losses = 0
                 new_map_diff = 0
+                currGames = {}
+
                 # get all the games related to team
                 for e in m2.decls():
                     if team.name in e.name() and "_pos" not in e.name():
                         # save result of games
                         if e.name()[4:7]+"-"+e.name()[0:3] in games:
                             games[e.name()[4:7]+"-"+e.name()[0:3]].append(int(m2[e].as_string()))
+                            currGames[e.name()[4:7]+"-"+e.name()[0:3]].append(int(m2[e].as_string()))
                         else:
                             games[e.name()] = [int(m2[e].as_string())]
+                            currGames[e.name()] = [int(m2[e].as_string())]
 
                         # if e.name()[0:3] == team.name and m2[e] == 3:
                         #     new_wins += 1
@@ -171,8 +177,8 @@ def findAllScenarios(S, index):
                         #     new_losses += 1
                         # games[e.name()] = m2[e]
                         # games.append(e.name() + " " + str(m2[e]))
-                    
-                for key, val in games.items():
+
+                for key, val in currGames.items():
                     if team.name == key[0:3]:
                         if val[0] == 3:
                             new_wins += 1
