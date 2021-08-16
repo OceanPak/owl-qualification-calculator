@@ -31,12 +31,12 @@ class ResultsTable extends React.Component {
         // https://stackoverflow.com/questions/19009591/how-to-break-a-line-or-space-in-between-two-rows-of-the-html-table/23897857
         return items.map((row, index)=>{ // 2 trs
             return <div>
-                <tr>
+                <tr class="row1">
                     <td>Image</td>
                     <td>{row[0].substring(0,3)}</td>
                     <td>{row[1][0]}</td>
                 </tr>
-                <tr>
+                <tr class="row2">
                     <td>Image</td>
                     <td>{row[0].substring(4,7)}</td>
                     <td>{row[1][1]}</td>
@@ -48,7 +48,7 @@ class ResultsTable extends React.Component {
       
     render() {
         return (
-            <div>
+            <div class="results">
                 <table>
                     <tr>
                         <th>Match Result</th>

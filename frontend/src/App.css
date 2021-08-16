@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+tr.row2 td {
+  padding-bottom: 40px;
+}
+
+.data {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  justify-content: center;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.results {
+  padding-left: 100px;
+}

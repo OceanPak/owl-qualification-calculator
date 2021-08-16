@@ -54,8 +54,6 @@ teams = [
 ]
 
 def initSolver():
-    gameVars = []
-
     z3.set_option('smt.random_seed', 0)
     S = z3.Solver()
 
@@ -63,8 +61,6 @@ def initSolver():
     for g in upcoming_games:
         g.team1score = z3.Int(g.team1 + "-" + g.team2)
         g.team2score = z3.Int(g.team2 + "-" + g.team1)
-        gameVars.append(g.team1score)
-        gameVars.append(g.team2score)
         S.add(g.team1score >= 0)
         S.add(g.team1score <= 3)
         S.add(g.team2score >= 0)
@@ -116,6 +112,15 @@ def initSolver():
             if i < j:
                 S.add(ti.position != tj.position)
     
+    return S
+
+def teamMustQualify(S, name):
+    sfs_lst = list(filter(lambda t: t.name == name, teams))
+    S.add(sfs_lst[0].position <= 6)
+    return S
+
+def teamWinsMatch(S, winningTeam, losingTeam):
+    S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
     return S
 
 def findAllScenarios(S, index):
@@ -210,6 +215,7 @@ def findAllScenarios(S, index):
     return json.dumps(([s.__dict__ for s in finalResults],finalGames))
 
 # S = initSolver()
+# S = teamWinsMatch(S, "ATL", "BOS")
 # print(findAllScenarios(S, 0))
 
 # winners = findTeamsWithPossiblePosition(S, teams)

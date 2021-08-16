@@ -277,15 +277,19 @@ class StandingsTable extends React.Component {
   render() {
     return (
       <div>
-        <table>
-          <thead>
-            <tr>{this.getHeader()}</tr>
-          </thead>
-          <tbody>
-            {this.getRowsData()}
-          </tbody>
-        </table>
-        <ResultsTable result={this.state.result} />
+        <div class="data">
+          <div>
+            <table>
+              <thead>
+                <tr>{this.getHeader()}</tr>
+              </thead>
+              <tbody>
+                {this.getRowsData()}
+              </tbody>
+            </table>
+          </div>
+          <ResultsTable result={this.state.result} />
+        </div>
         <button 
           type="button" 
           onClick={() => this.nextScenario()}
