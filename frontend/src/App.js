@@ -1,5 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
+import RenderRow from "./RenderRow"
+import ResultsTable from "./ResultsTable"
 
 // https://www.owlstandings.com/
 
@@ -100,7 +102,7 @@ const TeamTable = (props) => {
   //   });
   // }, []);
 
-  var index = 1;
+  var index = 0;
   const threshold = 12;
   // TODO: Do filtering here, called by onclick
 
@@ -191,29 +193,6 @@ class StandingsTable extends React.Component {
       result : [ {} ],
       refreshShoeList: false
     }
-    this.a = [
-      [
-        "ATL-BOS",
-        [
-          3,
-          2
-        ]
-      ],
-      [
-        "WAS-GLA",
-        [
-          3,
-          0
-        ]
-      ],
-      [
-        "DAL-TOR",
-        [
-          3,
-          1
-        ]
-      ]
-    ]
   }
 
   componentDidMount() {
@@ -269,48 +248,6 @@ class StandingsTable extends React.Component {
       </div>
     );
   }
-}
-
-class ResultsTable extends React.Component {
-  constructor(props){
-    super(props);
-    console.log(this.props)
-    this.getRowsData = this.getRowsData.bind(this);
-    this.getKeys = this.getKeys.bind(this);
-    this.state = {
-      result: this.props.result
-    }
-  }
-  
-  getKeys = function(){
-    return Object.keys(this.state.result[0]);
-  }
-  
-  getRowsData = function(){
-    var items = this.state.result;
-    var keys = this.getKeys();
-    return items.map((row, index)=>{ // 2 trs
-      return <tr key={index}><RenderRow key={index} data={row} keys={keys}/></tr>
-    })
-  }
-  
-  render() {
-    return (
-      <div>
-        <table>
-          <tbody>
-            {this.getRowsData()}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-}
- 
-const RenderRow = (props) =>{ // 3 tds here
-  return props.keys.map((key, index)=>{
-      return <td key={props.data[key]}>{props.data[key]}</td>
-  })
 }
 
 function App() {
