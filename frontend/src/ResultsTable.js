@@ -1,4 +1,5 @@
 import React from "react";
+import TeamImage from "./TeamImage"
 
 const RenderResultsRow = (props) =>{ // 3 tds here
     return props.keys.map((key, index)=>{
@@ -32,14 +33,30 @@ class ResultsTable extends React.Component {
         return items.map((row, index)=>{ // 2 trs
             return <div>
                 <tr class="row1">
-                    <td>Image</td>
+                    <td><TeamImage team={row[0].substring(0,3)} /></td>
                     <td>{row[0].substring(0,3)}</td>
                     <td>{row[1][0]}</td>
+                    <td>
+                        <button type="button">
+                            Should Win
+                        </button>
+                        <button type="button">
+                            Should Sweep
+                        </button>
+                    </td>
                 </tr>
                 <tr class="row2">
-                    <td>Image</td>
+                    <td><TeamImage team={row[0].substring(4,7)} /></td>
                     <td>{row[0].substring(4,7)}</td>
                     <td>{row[1][1]}</td>
+                    <td>
+                    <button type="button">
+                            Should Win
+                        </button>
+                        <button type="button">
+                            Should Sweep
+                        </button>
+                    </td>
                 </tr>
                 </div>
             // return <tr key={index}><RenderResultsRow key={index} data={row} keys={keys}/></tr>

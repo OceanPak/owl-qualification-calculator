@@ -123,6 +123,11 @@ def teamWinsMatch(S, winningTeam, losingTeam):
     S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
     return S
 
+def teamSweepMatch(S, winningTeam, losingTeam):
+    S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
+    S.add(z3.Int(losingTeam + "-" + winningTeam) == 0)
+    return S
+
 def findAllScenarios(S, index):
     "Returns a list of teams which *can* satisfy predicate pos."
     # S.push()
@@ -137,7 +142,7 @@ def findAllScenarios(S, index):
 
     while S.check() == z3.sat:
         # for faster loading times, return first 100 scenarios (100 * 12 teams)
-        if len(finalResults) > 12:
+        if len(finalResults) > 60:
             break
         # skip over seen scenarios until it reaches index, could be optimized here
         if currIndex < index:

@@ -278,7 +278,7 @@ class StandingsTable extends React.Component {
     return (
       <div>
         <div class="data">
-          <div>
+          <div class="placing">
             <table>
               <thead>
                 <tr>{this.getHeader()}</tr>

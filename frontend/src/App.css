@@ -48,8 +48,17 @@ tr.row2 td {
   justify-content: center;
   padding-top: 30px;
   padding-bottom: 30px;
+  /* max-width: 1600px;
+  margin: 0 auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  width: 100%; */
 }
 
 .results {
   padding-left: 100px;
+}
+
+td {
+  vertical-align: middle;
 }
