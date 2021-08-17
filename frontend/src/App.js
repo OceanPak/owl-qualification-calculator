@@ -185,7 +185,9 @@ class StandingsTable extends React.Component {
       data: [
         { }
       ],
-      result : [ {} ]
+      result : [ {} ],
+      sortKey: "pos",
+      sortAscending: true
     }
     console.log(this.state)
   }
@@ -200,6 +202,14 @@ class StandingsTable extends React.Component {
       
       // filter based on index
       var filteredData = data[0].filter((_, index) => index >= this.state.index * this.threshold && index < this.state.index * this.threshold + this.threshold)
+      filteredData.sort((a,b) => {
+        if (a["pos"] < b["pos"]) {
+          return -1
+        } else {
+          return 1
+        }
+      })
+      
       var filteredResult = [data[1][this.state.index]] // TODO: Should have index
 
       // fix keys to fit the format of the table
@@ -231,6 +241,14 @@ class StandingsTable extends React.Component {
         
         // filter based on index
         var filteredData = data[0].filter((_, index) => index >= newIndex * this.threshold && index < newIndex * this.threshold + this.threshold)
+        filteredData.sort((a,b) => {
+          if (a["pos"] < b["pos"]) {
+            return -1
+          } else {
+            return 1
+          }
+        })
+
         var filteredResult = [data[1][newIndex]] // TODO: Should have index
   
         // fix keys to fit the format of the table
@@ -244,6 +262,14 @@ class StandingsTable extends React.Component {
       this.setState({index: newIndex})
       // filter based on index
       var filteredData = this.state.fullData[0].filter((_, index) => index >= newIndex * this.threshold && index < newIndex * this.threshold + this.threshold)
+      filteredData.sort((a,b) => {
+        if (a["pos"] < b["pos"]) {
+          return -1
+        } else {
+          return 1
+        }
+      })
+      
       var filteredResult = [this.state.fullData[1][newIndex]] // TODO: Should have index
       
       // fix keys to fit the format of the table
@@ -256,18 +282,68 @@ class StandingsTable extends React.Component {
   }
   
   getKeys = function(){
-    return Object.keys(this.state.data[0]);
+    var keys = Object.keys(this.state.data[0]);
+    // switching pos and name so pos goes first
+    if (keys.length > 1) {
+      var temp = keys[1]
+      keys[1] = keys[0]
+      keys[0] = temp
+      return keys
+    }
+    return keys;
+  }
+
+  sortByKey = function(key) {
+    let sortableTeams = [...this.state.data];
+    // console.log(sortableTeams)
+    sortableTeams.sort((a,b) => {
+      if (key == this.state.sortKey) {
+        let reverse = !this.state.sortAscending
+        this.setState({sortAscending: reverse})
+        if (reverse) {
+          if (a[key] < b[key]) {
+            return -1
+          } 
+          if (a[key] > b[key]) {
+            return 1
+          }
+          return 0;
+        } else {
+          if (a[key] < b[key]) {
+            return 1
+          } 
+          if (a[key] > b[key]) {
+            return -1
+          }
+          return 0;
+        }
+      } else {
+        this.setState({sortKey: key, sortAscending: true})
+        if (a[key] < b[key]) {
+          return -1
+        } 
+        if (a[key] > b[key]) {
+          return 1
+        }
+        return 0;
+      }
+    })
+    this.setState({data: sortableTeams})
+    // console.log(this.state.data)
   }
   
   getHeader = function(){
     var keys = this.getKeys();
     return keys.map((key, index)=>{
-      return <th>{key.toUpperCase()}</th>
+      return <th>
+        <button type="button" onClick={() => this.sortByKey(key)}>
+          {key.toUpperCase()}</button></th>
     })
   }
   
   getRowsData = function(){
     var items = this.state.data;
+    console.log("items", items)
     var keys = this.getKeys();
     return items.map((row, index)=>{
       return <tr><RenderRow data={row} keys={keys}/></tr>
@@ -302,9 +378,12 @@ class StandingsTable extends React.Component {
 }
 
 function App() {
+  var index = 0;
+  const threshold = 12;
   return (
     <div className="App">
-      <TeamTable
+      <StandingsTable index={index} threshold={threshold} />
+      {/* <TeamTable
         teams={[
           {rank: 1, team: 'dragons', win: 18, loss: 4, diff: 16},
           {rank: 2, team: 'dynasty', win: 11, loss: 3, diff: 18},
@@ -315,7 +394,7 @@ function App() {
           {rank: 7, team: 'charge', win: 3, loss: 9, diff: -18},
           {rank: 8, team: 'valiant', win: 0, loss: 14, diff: -40},
         ]}
-      />
+      /> */}
     </div>
   )
 }
