@@ -32,25 +32,30 @@ class Scenario:
 
 # Constants
 upcoming_games = [
-    Game("ATL", "BOS"),
-    Game("TOR", "DAL"),
-    Game("WAS", "GLA")
+    Game("PAR", "TOR"),
+    Game("FLA", "HOU"),
+    Game("LDN", "PAR"),
+    Game("SFS", "VAN"),
+    Game("FLA", "GLA"),
+    Game("LDN", "VAN"),
+    Game("GLA", "HOU"),
+    Game("SFS", "TOR"),
 ]
 
 # Figure out the points tally and score at the end of the stage
 teams = [
-    Team("BOS", 3, 0, 8, "WEST"),
-    Team("DAL", 3, 0, 5, "WEST"),
-    Team("PAR", 3, 1, 4, "WEST"),
-    Team("ATL", 2, 1, 5, "WEST"),
-    Team("GLA", 2, 1, 3, "WEST"),
-    Team("WAS", 2, 1, 3, "WEST"),
-    Team("TOR", 2, 1, 1, "WEST"),
-    Team("HOU", 2, 2, -1, "WEST"),
-    Team("SFS", 2, 2, 0, "WEST"),
-    Team("LDN", 0, 4, -9, "WEST"),
-    Team("FLA", 0, 4, -8, "WEST"),
-    Team("VAN", 0, 4, -11, "WEST")
+    Team("ATL", 4, 0, 7, "WEST"),
+    Team("TOR", 2, 0, 5, "WEST"),
+    Team("DAL", 2, 2, 0, "WEST"),
+    Team("GLA", 1, 1, 2, "WEST"),
+    Team("SFS", 1, 1, 1, "WEST"),
+    Team("FLA", 1, 1, 1, "WEST"),
+    Team("HOU", 1, 1, 0, "WEST"),
+    Team("VAN", 1, 1, 0, "WEST"),
+    Team("PAR", 1, 1, -1, "WEST"),
+    Team("BOS", 1, 3, -5, "WEST"),
+    Team("WAS", 1, 3, -6, "WEST"),
+    Team("LDN", 0, 2, -4, "WEST")
 ]
 
 def initSolver():
@@ -115,17 +120,24 @@ def initSolver():
     return S
 
 def teamMustQualify(S, name):
-    sfs_lst = list(filter(lambda t: t.name == name, teams))
-    S.add(sfs_lst[0].position <= 6)
+    team_lst = list(filter(lambda t: t.name == name, teams))
+    if team_lst[0].region == "WEST":
+        S.add(team_lst[0].position <= 6)
+    else:
+        S.add(team_lst[0].position <= 4)
     return S
 
 def teamWinsMatch(S, winningTeam, losingTeam):
-    S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
+    teamNames = list(map(lambda x: x.name, teams))
+    if winningTeam in teamNames and losingTeam in teamNames:
+        S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
     return S
 
 def teamSweepMatch(S, winningTeam, losingTeam):
-    S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
-    S.add(z3.Int(losingTeam + "-" + winningTeam) == 0)
+    teamNames = list(map(lambda x: x.name, teams))
+    if winningTeam in teamNames and losingTeam in teamNames:
+        S.add(z3.Int(winningTeam + "-" + losingTeam) == 3)
+        S.add(z3.Int(losingTeam + "-" + winningTeam) == 0)
     return S
 
 def findAllScenarios(S, index):
@@ -133,7 +145,7 @@ def findAllScenarios(S, index):
     # S.push()
     # enforce where SFS qualifies
 
-    sfs_lst = list(filter(lambda t: t.name == "SFS", teams))
+    sfs_lst = list(filter(lambda t: t.name == "DAL", teams))
     S.add(sfs_lst[0].position <= 6)
     
     finalResults = []

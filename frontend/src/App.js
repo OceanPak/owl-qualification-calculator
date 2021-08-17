@@ -182,12 +182,11 @@ class StandingsTable extends React.Component {
       batchIndex: this.props.index,
       index: this.props.index,
       fullData: [ {} ],
-      data: [
-        { }
-      ],
+      data: [ {} ],
       result : [ {} ],
       sortKey: "pos",
-      sortAscending: true
+      sortAscending: true,
+      conditions: {index: 0, mustQualify: [], mustWin: {}, mustSweep: {}}
     }
     console.log(this.state)
   }
@@ -217,7 +216,7 @@ class StandingsTable extends React.Component {
       
       // set to state
       this.setState({data: filteredData, result: filteredResult})
-      console.log("state", this.state.result)
+      console.log("state", this.state)
     });
   }
 
@@ -329,7 +328,6 @@ class StandingsTable extends React.Component {
       }
     })
     this.setState({data: sortableTeams})
-    // console.log(this.state.data)
   }
   
   getHeader = function(){
@@ -343,17 +341,78 @@ class StandingsTable extends React.Component {
   
   getRowsData = function(){
     var items = this.state.data;
-    console.log("items", items)
     var keys = this.getKeys();
     return items.map((row, index)=>{
-      return <tr><RenderRow data={row} keys={keys}/></tr>
+      return <tr><RenderRow data={row} keys={keys}/>
+      <button 
+        type="button" 
+        onClick={() => this.fetchConditions("mustQualify", "", row.name)}
+      >
+        {row.name} must qualify
+      </button></tr>
     })
   }
-  
-  render() {
-    return (
-      <div>
-        <div class="data">
+
+  fetchConditions = (condition, matchName, winningTeam) => {
+    console.log(this.state)
+    var newstate = this.state.conditions
+    if (condition == "mustQualify") {
+      newstate[condition].push(winningTeam)
+    } else {
+      newstate[condition][matchName] = winningTeam
+    }
+    console.log("new state", newstate)
+    // this.setState({conditions: newstate})
+    fetch("/solve_conditions", {
+        method: "POST",
+        headers: {
+        'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(newstate)
+    }).then(res => res.json()).then(data => {
+      // save all the data for index filtering
+      console.log("all data", data) // TODO: When there are no cases
+      this.setState({fullData: data})
+
+      let newIndex = 0
+      this.setState({index: newIndex, batchIndex: newIndex})
+      
+      // filter based on index
+      if (data[0].length > 0) {
+        var filteredData = data[0].filter((_, index) => index >= newIndex * this.threshold && index < newIndex * this.threshold + this.threshold)
+        filteredData.sort((a,b) => {
+          if (a["pos"] < b["pos"]) {
+            return -1
+          } else {
+            return 1
+          }
+        })
+      } else {
+        var filteredData = [ {}, {} ]
+      }
+
+      if (data[1].length > 0) {
+        var filteredResult = [data[1][newIndex]] // TODO: Should have index
+        console.log(filteredResult)
+      } else {
+        var filteredResult = [ {}, {} ]
+      }
+      
+      // fix keys to fit the format of the table
+      filteredResult.map(obj => filteredResult = Object.keys(obj).map(function (key) { return [key, obj[key]]} ))
+      
+      // set to state
+      this.setState({data: filteredData, result: filteredResult})
+      console.log("new state", this.state)
+    });
+    
+  }
+
+  checkIfEmpty = function(length){
+    if (length == 2) {
+      return <p>No situations found!</p>
+    } else {
+      return <div class="data">
           <div class="placing">
             <table>
               <thead>
@@ -364,14 +423,56 @@ class StandingsTable extends React.Component {
               </tbody>
             </table>
           </div>
-          <ResultsTable result={this.state.result} />
-        </div>
-        <button 
-          type="button" 
-          onClick={() => this.nextScenario()}
-        >
-          Next Scenario
-        </button>
+          <ResultsTable result={this.state.result} fetch={this.fetchConditions}/>
+      </div>
+    }
+  }
+
+  buttonIfEmpty = function(length){
+    if (length == 2) {
+      return <button 
+        type="button" 
+        onClick={() => window.location.reload()}
+      >
+        Reset Search
+      </button>
+    } else {
+      return <button 
+        type="button" 
+        onClick={() => this.nextScenario()}
+      >
+        Next Scenario
+      </button>
+    }
+  }
+
+  displayEnforcedWinConditions = function(conditions) {
+    return Object.entries(conditions).map((arr) => {
+      return <p>{arr[1]} wins {arr[0]}</p>
+    })
+  }
+
+  displayEnforcedSweepConditions = function(conditions) {
+    return Object.entries(conditions).map((arr) => {
+      return <p>{arr[1]} sweeps {arr[0]}</p>
+    })
+  }
+
+  displayEnforcedQualifyConditions = function(conditions) {
+    return conditions.map((team) => {
+      return <p>{team} qualifies</p>
+    })
+  }
+  
+  render() {
+    return (
+      <div>
+        {this.checkIfEmpty(this.state.data.length)}
+        {this.buttonIfEmpty(this.state.data.length)}
+        <p>Enforced Conditions: 
+          {this.displayEnforcedWinConditions(this.state.conditions["mustWin"])}
+          {this.displayEnforcedSweepConditions(this.state.conditions["mustSweep"])}
+          {this.displayEnforcedQualifyConditions(this.state.conditions["mustQualify"])}</p>
       </div>
     );
   }
@@ -383,18 +484,6 @@ function App() {
   return (
     <div className="App">
       <StandingsTable index={index} threshold={threshold} />
-      {/* <TeamTable
-        teams={[
-          {rank: 1, team: 'dragons', win: 18, loss: 4, diff: 16},
-          {rank: 2, team: 'dynasty', win: 11, loss: 3, diff: 18},
-          {rank: 3, team: 'fusion', win: 9, loss: 5, diff: 12},
-          {rank: 4, team: 'hunters', win: 9, loss: 5, diff: 7},
-          {rank: 5, team: 'spark', win: 7, loss: 7, diff: 4},
-          {rank: 6, team: 'excelsior', win: 7, loss: 7, diff: 1},
-          {rank: 7, team: 'charge', win: 3, loss: 9, diff: -18},
-          {rank: 8, team: 'valiant', win: 0, loss: 14, diff: -40},
-        ]}
-      /> */}
     </div>
   )
 }
