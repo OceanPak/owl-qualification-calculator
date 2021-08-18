@@ -4,19 +4,30 @@ from z3_calc import initSolver, findAllScenarios, teamMustQualify, teamWinsMatch
 
 app = Flask(__name__)
 
-@app.route('/solve')
+@app.route('/solve', methods=['POST'])
 def get_winning_scenarios():
-    S = initSolver()
-    return findAllScenarios(S, 0)
+    # handle the POST request
+    if request.method == 'POST':
+        region = request.get_json()
+        if region != "WEST" and region != "EAST":
+            return "Error: Non supported region"
+        S = initSolver(region)
+        return findAllScenarios(S, 0)
+    else:
+        return "Only POST request accepted"
 
 @app.route('/solve-next-batch', methods=['POST'])
 def get_winning_scenarios_index():
     # handle the POST request
     if request.method == 'POST':
-        index = request.get_json()
+        received = request.get_json()
+        index = received["index"]
         if index < 0:
             return "Error: Index cannot be negative"
-        S = initSolver()
+        region = received["region"]
+        if region != "WEST" and region != "EAST":
+            return "Error: Non supported region"
+        S = initSolver(region)
         return findAllScenarios(S, index)
     else:
         return "Only POST request accepted"
@@ -26,7 +37,10 @@ def get_winning_scenarios_all_conditions():
     # handle the POST request
     if request.method == 'POST':
         team = request.get_json()
-        S = initSolver()
+        region = team["region"]
+        if region != "WEST" and region != "EAST":
+            return "Error: Non supported region"
+        S = initSolver(region)
         if team["mustQualify"] != []:
             for t in team["mustQualify"]:
                 S = teamMustQualify(S, t)

@@ -187,13 +187,24 @@ class StandingsTable extends React.Component {
       result : [ {} ],
       sortKey: "pos",
       sortAscending: true,
-      conditions: {index: 0, mustQualify: [], mustWin: {}, mustSweep: {}}
+      conditions: {index: 0, mustQualify: [], mustWin: {}, mustSweep: {}},
+      region: "WEST"
     }
     console.log(this.state)
   }
 
   componentDidMount() {
-    fetch('/solve').then(res => res.json()).then(data => {
+    this.solve(this.state.region);
+  }
+
+  solve = function(region) {
+    fetch("/solve", {
+      method: "POST",
+      headers: {
+      'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify(region)
+    }).then(res => res.json()).then(data => {
       console.log(data)
       // save all the data for index filtering
       this.setState({fullData: data})
@@ -232,7 +243,7 @@ class StandingsTable extends React.Component {
         headers: {
         'Content-Type' : 'application/json'
         },
-        body: JSON.stringify(newIndex)
+        body: JSON.stringify({index: newIndex, region: this.state.region})
       }).then(res => res.json()).then(data => {
         // save all the data for index filtering
         this.setState({fullData: data})
@@ -335,8 +346,10 @@ class StandingsTable extends React.Component {
     var keys = this.getKeys();
     return keys.map((key, index)=>{
       return <th>
-        <button type="button" onClick={() => this.sortByKey(key)}>
-          {key.toUpperCase()}</button></th>
+        {/* <button type="button" onClick={() => this.sortByKey(key)}> */}
+          {key.toUpperCase()}
+        {/* </button> */}
+        </th>
     })
   }
   
@@ -349,7 +362,7 @@ class StandingsTable extends React.Component {
         type="button" 
         onClick={() => this.fetchConditions("mustQualify", "", row.name)}
       >
-        {row.name} must qualify
+        {row.name} qualifies
       </button></tr>
     })
   }
@@ -362,6 +375,7 @@ class StandingsTable extends React.Component {
     } else {
       newstate[condition][matchName] = winningTeam
     }
+    newstate["region"] = this.state.region
     console.log("new state", newstate)
     // this.setState({conditions: newstate})
     fetch("/solve_conditions", {
@@ -409,40 +423,7 @@ class StandingsTable extends React.Component {
     
   }
 
-  checkIfEmpty = function(length){
-    if (length == 2) {
-      return <div>
-        {this.textBox(this.state.conditions)}
-        <p>No situations found!</p>
-        {this.buttonIfEmpty(this.state.data.length)}
-        </div>
-    } else {
-      return <div>
-        <h1>
-        <TeamImage team="OWL" />
-          Overwatch League: Path to Qualification</h1>
-        <p>Can Shock qualify for Summer Showdown with a 2-2 record? Can Mayhem make play-ins if they sweep their last two matches?</p>
-        <p>Ever wonder if a team can mathematically qualify for knockouts? Now you can figure out all the scenarios here!</p>
-        {this.textBox(this.state.conditions)}
-        <div class="data">
-          <div class="placing">
-            <table>
-              <thead>
-                <tr>{this.getHeader()}</tr>
-              </thead>
-              <tbody>
-                {this.getRowsData()}
-              </tbody>
-            </table>
-            {this.buttonIfEmpty(this.state.data.length)}
-          </div>
-          <ResultsTable result={this.state.result} fetch={this.fetchConditions}/>
-        </div>
-      </div>
-    }
-  }
-
-  buttonIfEmpty = function(length){
+  mainButton = function(length){
     if (length == 2) {
       return <button 
         type="button" 
@@ -458,6 +439,11 @@ class StandingsTable extends React.Component {
         Next Scenario
       </button>
     }
+  }
+
+  switchRegion = function(region) {
+    this.setState({region: region})
+    this.solve(region);
   }
 
   displayEnforcedWinConditions = function(conditions) {
@@ -478,23 +464,82 @@ class StandingsTable extends React.Component {
     })
   }
 
-  textBox = function(conditions) {
+  scenarioSupportText = function(conditions) {
     if (Object.entries(conditions["mustWin"]).length == 0 
     && Object.entries(conditions["mustSweep"]).length == 0
     && conditions["mustQualify"].length == 0) {
-      return <div class="scenarioSupportText"><p>Currently finding all possible scenarios.</p></div>
+      return <div class="scenarioSupportText">
+        <p>Finding all possible scenarios going into <b>Countdown Cup: Week 3</b>.</p>
+      </div>
     } else {
-      return <div class="scenarioSupportText"><p>Currently finding all scenarios where: 
+      return <div class="scenarioSupportText">
+        <p>Finding all scenarios going into <b>Countdown Cup: Week 3</b> where: 
           {this.displayEnforcedWinConditions(this.state.conditions["mustWin"])}
           {this.displayEnforcedSweepConditions(this.state.conditions["mustSweep"])}
           {this.displayEnforcedQualifyConditions(this.state.conditions["mustQualify"])}</p></div>
+    }
+  }
+
+  commonBodyText = function() {
+    return <div>
+      <div class="header">
+          <h1><TeamImage team="OWL" />
+          Overwatch League: Path to Qualification</h1>
+        </div>
+        <p>Can Shock qualify for Summer Showdown with a 2-2 record? Can Mayhem make play-ins if they sweep their last two matches?</p>
+        <p>Ever wonder if a team can mathematically qualify for knockouts? Now you can search for all the scenarios here!</p>
+        <div class="regionButtons">
+          <button 
+            type="button" 
+            onClick={() => this.switchRegion("EAST")}
+          >
+            East
+          </button>
+          <button 
+            type="button" 
+            onClick={() => this.switchRegion("WEST")}
+          >
+            West
+          </button>
+        </div>
+        {this.scenarioSupportText(this.state.conditions)}
+    </div>
+  }
+
+  body = function(length){
+    if (length == 2) {
+      return <div>
+        {this.commonBodyText()}
+        <p>No situations found!</p>
+        {this.mainButton(this.state.data.length)}
+        </div>
+    } else {
+      return <div>
+        {this.commonBodyText()}
+        <div class="data">
+          <div class="placing">
+            <p class="tableHeader"><b>Standings</b></p>
+            <table>
+              <thead>
+                <tr>{this.getHeader()}</tr>
+              </thead>
+              <tbody>
+                {this.getRowsData()}
+              </tbody>
+            </table>
+            {this.mainButton(this.state.data.length)}
+          </div>
+          <ResultsTable result={this.state.result} fetch={this.fetchConditions}/>
+        </div>
+      </div>
     }
   }
   
   render() {
     return (
       <div>
-        {this.checkIfEmpty(this.state.data.length)}
+        {this.body(this.state.data.length)}
+        <p>Made with ❤️ by <a href="https://github.com/OceanPak/">Ocean Pak</a></p>
       </div>
     );
   }

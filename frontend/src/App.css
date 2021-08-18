@@ -37,10 +37,6 @@
   }
 }
 
-tr.row2 td {
-  padding-bottom: 40px;
-}
-
 .data {
   display: flex;
   flex-wrap: wrap;
@@ -48,16 +44,17 @@ tr.row2 td {
   justify-content: center;
   padding-top: 30px;
   padding-bottom: 30px;
-  /* max-width: 1600px;
-  margin: 0 auto;
-  padding-right: 1rem;
-  padding-left: 1rem;
-  width: 100%; */
+}
+
+.placing {
+  padding-left: 2%;
+  padding-right: 2%;
 }
 
 .results {
   flex-direction: row;
-  padding-left: 100px;
+  padding-left: 2%;
+  padding-right: 2%;
   width: 50%;
 }
 
@@ -65,20 +62,36 @@ td {
   vertical-align: middle;
 }
 
-.results-table .post-item {
-  float: left;
-  width: 32%;
-  margin-right: 2%;
-  margin-bottom: 30px;
+.OWL {
+  vertical-align: middle;
+  padding-right: 0.5%;
 }
 
-.results-table :nth-child(3n+0).post-item {
+.results-table {
+  overflow: auto;
+  width: 1000px;
+  max-height: 750px;
+}
+
+.results-table .post-item {
+  float: left;
+  /* width: 50%; */
+  margin-right: 1%;
+  margin-bottom: 5%;
+  border-top: 1px solid rgb(219, 219, 219);
+  border-bottom: 1px solid rgb(219, 219, 219);
+  border-left: 1px solid rgb(219, 219, 219);
+  border-right: 1px solid rgb(219, 219, 219);
+}
+
+/* .results-table :nth-child(3n+0).post-item {
 	margin-right: 0%;
   clear: right;
 }
 
-
-.results-table:nth-child(3n+1) {clear: left;}
+.results-table:nth-child(3n+1) {
+  clear: left;
+} */
 
 .scenarioSupportText {
   background-color:#FCD7AD;
@@ -86,4 +99,27 @@ td {
   max-height:165px;
   width: 75%;
   margin: auto;
+}
+
+table {
+  margin-bottom: 5%;
+}
+
+.regionButtons {
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+.tableHeader {
+  background-color:#2a1906;
+  color: white;
+  height: 25px;
+} 
+
+.normal {
+  width: 87px;
+}
+
+button {
+  width: 100px;
 }

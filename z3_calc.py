@@ -40,6 +40,10 @@ upcoming_games = [
     Game("LDN", "VAN"),
     Game("GLA", "HOU"),
     Game("SFS", "TOR"),
+    Game("HZS", "CDH"),
+    Game("VAL", "GZC"),
+    Game("VAL", "CDH"),
+    Game("GZC", "HZS"),
 ]
 
 # Figure out the points tally and score at the end of the stage
@@ -55,12 +59,22 @@ teams = [
     Team("PAR", 1, 1, -1, "WEST"),
     Team("BOS", 1, 3, -5, "WEST"),
     Team("WAS", 1, 3, -6, "WEST"),
-    Team("LDN", 0, 2, -4, "WEST")
+    Team("LDN", 0, 2, -4, "WEST"),
+    Team("PHI", 3, 1, 6, "EAST"),
+    Team("SEO", 3, 1, 4, "EAST"),
+    Team("CDH", 2, 0, 4, "EAST"),
+    Team("NYE", 2, 2, 0, "EAST"),
+    Team("SHD", 2, 2, -1, "EAST"),
+    Team("HZS", 0, 2, -3, "EAST"),
+    Team("GZC", 0, 2, -4, "EAST"),
+    Team("VAL", 0, 2, -6, "EAST")
 ]
 
-def initSolver():
+def initSolver(region):
     z3.set_option('smt.random_seed', 0)
     S = z3.Solver()
+
+    regionTeams = [t for t in teams if t.region == region]
 
     # Encode constraints on the number of points that can be scored in each game
     for g in upcoming_games:
@@ -73,7 +87,7 @@ def initSolver():
         S.add(g.team1score + g.team2score <= 5)
         S.add(z3.Or(g.team1score == 3, g.team2score == 3))
 
-    for t in teams:
+    for t in regionTeams:
         # select the relevant games for this team
         currentT1TeamGames = [g for g in upcoming_games if g.team1 == t.name]
         # count the number of points
@@ -94,17 +108,17 @@ def initSolver():
         t.finalMapDiff = t1differential + t2differential + t.diff
 
     # specific position must be between 1 and n
-    for t in teams:
+    for t in regionTeams:
         # absolute positions
         t.position = z3.Int(t.name + '_pos')
         S.add(t.position >= 1)
-        S.add(t.position <= len(teams))
+        S.add(t.position <= len(regionTeams))
 
     # relative positions
-    for i in range(len(teams)):
-        ti = teams[i]
-        for j in range(len(teams)):
-            tj = teams[j]
+    for i in range(len(regionTeams)):
+        ti = regionTeams[i]
+        for j in range(len(regionTeams)):
+            tj = regionTeams[j]
             if i == j: continue
 
             # more points => higher finish
@@ -145,16 +159,13 @@ def findAllScenarios(S, index):
     # S.push()
     # enforce where SFS qualifies
 
-    sfs_lst = list(filter(lambda t: t.name == "DAL", teams))
-    S.add(sfs_lst[0].position <= 6)
-    
     finalResults = []
     finalGames = []
     currIndex = 0
 
     while S.check() == z3.sat:
         # for faster loading times, return first 100 scenarios (100 * 12 teams)
-        if len(finalResults) > 60:
+        if len(finalResults) > 6:
             break
         # skip over seen scenarios until it reaches index, could be optimized here
         if currIndex < index:
@@ -206,13 +217,13 @@ def findAllScenarios(S, index):
                             new_wins += 1
                         else:
                             new_losses += 1
-                        new_map_diff = val[0] - val[1]
+                        new_map_diff += val[0] - val[1]
                     else:
                         if val[1] == 3:
                             new_wins += 1
                         else:
                             new_losses += 1
-                        new_map_diff = val[1] - val[0]
+                        new_map_diff += val[1] - val[0]
 
                 finalResults.append(Scenario(team.name, int(m[d].as_string()), team.win + new_wins, team.loss + new_losses, team.diff + new_map_diff, team.region))
                 currIndex += 1
@@ -231,7 +242,7 @@ def findAllScenarios(S, index):
     # S.pop()
     return json.dumps(([s.__dict__ for s in finalResults],finalGames))
 
-# S = initSolver()
+# S = initSolver("EAST")
 # S = teamWinsMatch(S, "ATL", "BOS")
 # print(findAllScenarios(S, 0))
 

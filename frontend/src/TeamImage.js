@@ -50,7 +50,12 @@ class TeamImage extends Component {
         else if (this.props.team === "VAN") { image = titans }
         else if (this.props.team === "BOS") { image = uprising }
         else if (this.props.team === "VAL") { image = valiant }
-        else if (this.props.team === "OWL") { image = owl }
+        else if (this.props.team === "OWL") { 
+            image = owl 
+            return (
+            <img className={this.props.team} src={image} style={{height:"40px"}}/>
+        );
+        }
 
         return (
             <img className={this.props.team} src={image} style={{height:"30px"}}/>
