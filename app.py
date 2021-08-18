@@ -7,6 +7,8 @@ from flask.helpers import send_from_directory
 app = Flask(__name__, static_folder="frontend/build", static_url_path='')
 CORS(app)
 
+# Deployment Tutorial https://www.youtube.com/watch?v=h96KP3JMX7Q
+
 @app.route('/')
 @cross_origin()
 def serve():
