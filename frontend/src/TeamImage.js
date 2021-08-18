@@ -20,6 +20,7 @@ import spitfire from './teamImages/spitfire.png'
 import titans from './teamImages/titans.png'
 import uprising from './teamImages/uprising.png'
 import valiant from './teamImages/valiant.png'
+import owl from './teamImages/owl.png'
 
 class TeamImage extends Component { 
     constructor(props) {
@@ -49,6 +50,7 @@ class TeamImage extends Component {
         else if (this.props.team === "VAN") { image = titans }
         else if (this.props.team === "BOS") { image = uprising }
         else if (this.props.team === "VAL") { image = valiant }
+        else if (this.props.team === "OWL") { image = owl }
 
         return (
             <img className={this.props.team} src={image} style={{height:"30px"}}/>

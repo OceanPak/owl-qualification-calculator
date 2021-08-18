@@ -17,7 +17,7 @@ class ResultsTable extends React.Component {
         }
         
         return items.map((row, index)=>{ // 2 trs
-            return <div>
+            return <div class="post-item">
                 <tr class="row1">
                     <td><TeamImage team={row[0].substring(0,3)} /></td>
                     <td>{row[0].substring(0,3)}</td>
@@ -60,12 +60,12 @@ class ResultsTable extends React.Component {
     render() {
         return (
             <div class="results">
-                <table>
                     {this.checkIfEmpty()}
-                    <tbody>
-                        {this.getRowsData()}
-                    </tbody>
-                </table>
+                    <div class="results-table">
+                        <tbody>
+                            {this.getRowsData()}
+                        </tbody>
+                    </div>
             </div>
         );
     }

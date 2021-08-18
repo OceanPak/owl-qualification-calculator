@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import ResultsTable from "./ResultsTable"
+import TeamImage from "./TeamImage"
 
 // https://www.owlstandings.com/
 
@@ -410,9 +411,20 @@ class StandingsTable extends React.Component {
 
   checkIfEmpty = function(length){
     if (length == 2) {
-      return <p>No situations found!</p>
+      return <div>
+        {this.textBox(this.state.conditions)}
+        <p>No situations found!</p>
+        {this.buttonIfEmpty(this.state.data.length)}
+        </div>
     } else {
-      return <div class="data">
+      return <div>
+        <h1>
+        <TeamImage team="OWL" />
+          Overwatch League: Path to Qualification</h1>
+        <p>Can Shock qualify for Summer Showdown with a 2-2 record? Can Mayhem make play-ins if they sweep their last two matches?</p>
+        <p>Ever wonder if a team can mathematically qualify for knockouts? Now you can figure out all the scenarios here!</p>
+        {this.textBox(this.state.conditions)}
+        <div class="data">
           <div class="placing">
             <table>
               <thead>
@@ -422,8 +434,10 @@ class StandingsTable extends React.Component {
                 {this.getRowsData()}
               </tbody>
             </table>
+            {this.buttonIfEmpty(this.state.data.length)}
           </div>
           <ResultsTable result={this.state.result} fetch={this.fetchConditions}/>
+        </div>
       </div>
     }
   }
@@ -463,16 +477,24 @@ class StandingsTable extends React.Component {
       return <p>{team} qualifies</p>
     })
   }
+
+  textBox = function(conditions) {
+    if (Object.entries(conditions["mustWin"]).length == 0 
+    && Object.entries(conditions["mustSweep"]).length == 0
+    && conditions["mustQualify"].length == 0) {
+      return <div class="scenarioSupportText"><p>Currently finding all possible scenarios.</p></div>
+    } else {
+      return <div class="scenarioSupportText"><p>Currently finding all scenarios where: 
+          {this.displayEnforcedWinConditions(this.state.conditions["mustWin"])}
+          {this.displayEnforcedSweepConditions(this.state.conditions["mustSweep"])}
+          {this.displayEnforcedQualifyConditions(this.state.conditions["mustQualify"])}</p></div>
+    }
+  }
   
   render() {
     return (
       <div>
         {this.checkIfEmpty(this.state.data.length)}
-        {this.buttonIfEmpty(this.state.data.length)}
-        <p>Enforced Conditions: 
-          {this.displayEnforcedWinConditions(this.state.conditions["mustWin"])}
-          {this.displayEnforcedSweepConditions(this.state.conditions["mustSweep"])}
-          {this.displayEnforcedQualifyConditions(this.state.conditions["mustQualify"])}</p>
       </div>
     );
   }

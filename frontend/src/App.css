@@ -56,10 +56,34 @@ tr.row2 td {
 }
 
 .results {
+  flex-direction: row;
   padding-left: 100px;
   width: 50%;
 }
 
 td {
   vertical-align: middle;
+}
+
+.results-table .post-item {
+  float: left;
+  width: 32%;
+  margin-right: 2%;
+  margin-bottom: 30px;
+}
+
+.results-table :nth-child(3n+0).post-item {
+	margin-right: 0%;
+  clear: right;
+}
+
+
+.results-table:nth-child(3n+1) {clear: left;}
+
+.scenarioSupportText {
+  background-color:#FCD7AD;
+  overflow: auto;
+  max-height:165px;
+  width: 75%;
+  margin: auto;
 }
