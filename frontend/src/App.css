@@ -73,6 +73,34 @@ td {
   max-height: 750px;
 }
 
+@media (min-width: 1200px) and (max-width: 1600px) {
+  .results-table {
+    width: 500px;
+    padding-left: 150px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .results-table {
+    width: 500px;
+    padding-left: 0px;
+  }
+}
+
+@media (max-width: 700px) {
+  .results-table {
+    width: 300px;
+    padding-left: 0px;
+  }
+}
+
+@media (max-width: 500px) {
+  .results-table {
+    width: 200px;
+    padding-left: 0px;
+  }
+}
+
 .results-table .post-item {
   float: left;
   /* width: 50%; */

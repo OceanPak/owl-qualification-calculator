@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6efc1741.chunk.css",
+    "main.js": "/static/js/main.9048c5a9.chunk.js",
+    "main.js.map": "/static/js/main.9048c5a9.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.fb3365c4.js",
+    "runtime-main.js.map": "/static/js/runtime-main.fb3365c4.js.map",
+    "static/js/2.29a9896b.chunk.js": "/static/js/2.29a9896b.chunk.js",
+    "static/js/2.29a9896b.chunk.js.map": "/static/js/2.29a9896b.chunk.js.map",
+    "static/js/3.5d293990.chunk.js": "/static/js/3.5d293990.chunk.js",
+    "static/js/3.5d293990.chunk.js.map": "/static/js/3.5d293990.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.6efc1741.chunk.css.map": "/static/css/main.6efc1741.chunk.css.map",
+    "static/js/2.29a9896b.chunk.js.LICENSE.txt": "/static/js/2.29a9896b.chunk.js.LICENSE.txt",
+    "static/media/eternal.a366a5c1.png": "/static/media/eternal.a366a5c1.png",
+    "static/media/hunters.f80156dd.png": "/static/media/hunters.f80156dd.png",
+    "static/media/justice.35e53c03.png": "/static/media/justice.35e53c03.png",
+    "static/media/owl.dd59f812.png": "/static/media/owl.dd59f812.png",
+    "static/media/reign.65131c0d.png": "/static/media/reign.65131c0d.png",
+    "static/media/titans.c0975d6f.png": "/static/media/titans.c0975d6f.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.fb3365c4.js",
+    "static/js/2.29a9896b.chunk.js",
+    "static/css/main.6efc1741.chunk.css",
+    "static/js/main.9048c5a9.chunk.js"
+  ]
+}
